@@ -42,6 +42,7 @@ find_package(
         rospy
         dynamic_reconfigure
         std_msgs
+        std_srvs
         sensor_msgs
         pcl_ros
         pcl_conversions

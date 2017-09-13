@@ -65,7 +65,7 @@ double EnsensoNxNode::rate() const
     return rate_;
 }
 
-void EnsensoNxNode::publish()
+bool EnsensoNxNode::publish()
 {
     //Get a single capture from camera and publish the point cloud
     if ( camera_->capture(cloud_) == 1 )
@@ -77,42 +77,28 @@ void EnsensoNxNode::publish()
         cloud_.header.stamp = (pcl::uint64_t)(ts.toSec()*1e6); //TODO: should be set by the EnsensoNx::Device class
         cloud_.header.frame_id = frame_name_;
         cloud_publisher_.publish(cloud_);
-    }
-    else
-    {
-        std::cout << "EnsensoNxNode::publish(): Error with point cloud capture" << std::endl;
+        return true;
     }
 
+    std::cout << "EnsensoNxNode::publish(): Error with point cloud capture" << std::endl;
+    return false;
 }
 
-bool EnsensoNxNode::pointCloudServiceCallback(sensor_msgs::SnapshotCloud::Request  & _request,
-                                              sensor_msgs::SnapshotCloud::Response & _reply)
+bool EnsensoNxNode::pointCloudServiceCallback(std_srvs::Trigger::Request  & _request,
+                                              std_srvs::Trigger::Response & _reply)
 {
-    //configure capture according request
-    if (_request.exposure == 0)
-    {
-        capture_params_.auto_exposure_ = true;
-    }
-    else
-    {
-        capture_params_.auto_exposure_ = false;
-        capture_params_.exposure_time_ = _request.exposure;
-    }
-    capture_params_.dense_cloud_ = _request.dense_cloud;
+
+    capture_params_.auto_exposure_ = true;
+    capture_params_.dense_cloud_ = true;
     camera_->configureCapture(capture_params_);
 
-    //Get a single capture from camera and set the reply
-    if ( camera_->capture(cloud_) == 1 )
-    {
-        //get time
-        ros::Time ts = ros::Time::now();
-        cloud_.header.stamp = (pcl::uint64_t)(ts.toSec()*1e6); //TODO: should be set by the EnsensoNx::Device class
-        cloud_.header.frame_id = frame_name_;
-        pcl::toROSMsg(cloud_, _reply.cloud); //see pcl-ros conversions at http://wiki.ros.org/action/fullsearch/pcl/Overview
+    if (this->publish()){
+        _reply.message = "Successfully published.";
+        _reply.success = true;
     }
-    else
-    {
-        std::cout << "EnsensoNxNode::pointCloudServiceCallback(): Error while capturing point cloud" << std::endl;
+    else {
+        _reply.message = "Failed to publish cloud.";
+        _reply.success = false;
     }
 
     //return

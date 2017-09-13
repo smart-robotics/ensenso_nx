@@ -12,7 +12,7 @@
 #include <pcl_ros/point_cloud.h> //PCL-ROS interoperability
 #include <pcl_conversions/pcl_conversions.h> //conversions from/to PCL/ROS
 //#include <std_msgs/Empty.h> //snapshot request
-#include <sensor_msgs/SnapshotCloud.h> //forked at https://github.com/beta-robots/common_msgs
+#include <std_srvs/Trigger.h> //forked at https://github.com/beta-robots/common_msgs
 
 //this package dependencies
 #include <ensenso_nx/ensenso_nx_paramsConfig.h> //ROS dynamic configure
@@ -74,12 +74,12 @@ class EnsensoNxNode
         double rate() const;
 
         //Call to device snapshot acquisition and publish the point cloud
-        void publish();
+        bool publish();
 
     protected:
         //Service callback implementing the point cloud capture
-        bool pointCloudServiceCallback(sensor_msgs::SnapshotCloud::Request  & _request,
-                                       sensor_msgs::SnapshotCloud::Response & _reply);
+        bool pointCloudServiceCallback(std_srvs::Trigger::Request  & _request,
+                                       std_srvs::Trigger::Response & _reply);
 
 };
 #endif
