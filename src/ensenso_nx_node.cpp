@@ -1,5 +1,6 @@
 #include "ensenso_nx_node.h"
 
+
 EnsensoNxNode::EnsensoNxNode():
     nh_() //node handle without additional namespace
 {
@@ -9,9 +10,10 @@ EnsensoNxNode::EnsensoNxNode():
 
     //init the point cloud publisher
     cloud_publisher_ = nh_.advertise<pcl::PointCloud<pcl::PointXYZ> >("ensenso_cloud", 1);
+    rgbd_publisher_ = nh_.advertise<rgbd::RGBDImage >("ensenso_rgbd", 1);
 
     //init server
-    cloud_server_ = nh_.advertiseService("ensenso_server", &EnsensoNxNode::pointCloudServiceCallback, this);
+    cloud_server_ = nh_.advertiseService("ensenso_server", &EnsensoNxNode::publishServiceCallback, this);
 
     //Allocate the ensenso device with the provided serial number
 	ros::param::get("serial_number", param_str);
@@ -33,6 +35,9 @@ EnsensoNxNode::EnsensoNxNode():
         camera_->configureCapture(this->capture_params_);
     }
 
+    //check for rgbd mode
+    ros::param::get("rgbd", this->rgbd);
+
     //print configs
     std::cout << "ROS EnsensoNxNode Settings: " << std::endl;
     std::cout << "\trun mode: \t" << run_mode_ << std::endl;
@@ -40,12 +45,13 @@ EnsensoNxNode::EnsensoNxNode():
     if ( run_mode_ == PUBLISHER ) //in SERVER, rate is not applicable, and other capture params are set at the request message
     {
         std::cout << "\trate [hz]: \t" << rate_  << std::endl;
-        std::cout << "\tauto_exposure [hz]: \t" << capture_params_.auto_exposure_ << std::endl;
+        std::cout << "\tauto_exposure [t/f]: \t" << capture_params_.auto_exposure_ << std::endl;
         if ( !capture_params_.auto_exposure_ )
         {
             std::cout << "\texposure [ms]: \t" << capture_params_.exposure_time_ << std::endl;
         }
         std::cout << "\tdense_cloud: [t/f] \t" << capture_params_.dense_cloud_ << std::endl;
+        std::cout << "\trgbd: [t/f] \t" << this->rgbd << std::endl;
     }
 }
 
@@ -67,6 +73,36 @@ double EnsensoNxNode::rate() const
 
 bool EnsensoNxNode::publish()
 {
+    if (this->rgbd)
+        return this->publishRGBD();
+    else
+        return this->publishCloud();
+}
+
+bool EnsensoNxNode::publishRGBD()
+{
+    //Get a single capture from camera and publish the point cloud
+    if ( camera_->capture(image_) == 1 )
+    {
+        //get time
+        ros::Time ts = ros::Time::now();
+
+        //publish the cloud
+        image_.timestamp = (pcl::uint64_t)(ts.toSec()*1e9); //TODO: should be set by the EnsensoNx::Device class
+        image_.frame_id = frame_name_;
+        sr::rgbd::toData(image_, rgbd_msg.data);
+
+        rgbd_publisher_.publish(rgbd_msg);
+        return true;
+    }
+
+    std::cout << "EnsensoNxNode::publish(): Error with rgbd capture" << std::endl;
+    return false;
+}
+
+
+bool EnsensoNxNode::publishCloud()
+{
     //Get a single capture from camera and publish the point cloud
     if ( camera_->capture(cloud_) == 1 )
     {
@@ -84,8 +120,8 @@ bool EnsensoNxNode::publish()
     return false;
 }
 
-bool EnsensoNxNode::pointCloudServiceCallback(std_srvs::Trigger::Request  & _request,
-                                              std_srvs::Trigger::Response & _reply)
+bool EnsensoNxNode::publishServiceCallback(std_srvs::Trigger::Request &_request,
+                                           std_srvs::Trigger::Response &_reply)
 {
 
     capture_params_.auto_exposure_ = true;
@@ -97,7 +133,7 @@ bool EnsensoNxNode::pointCloudServiceCallback(std_srvs::Trigger::Request  & _req
         _reply.success = true;
     }
     else {
-        _reply.message = "Failed to publish cloud.";
+        _reply.message = "Failed to publish.";
         _reply.success = false;
     }
 

@@ -67,10 +67,100 @@ void Device::configureCapture(const CaptureParams & _params)
 //     this->configureCapture();
 // }
 
+
+    int Device::capture(sr::rgbd::Image & _rgb_image)
+    {
+        // Capture images
+        NxLibCommand (cmdCapture).execute();
+
+        // Compute Disparity Map
+        NxLibCommand (cmdComputeDisparityMap).execute();
+
+        // Compute Point Cloud
+        NxLibCommand (cmdComputePointMap).execute();
+
+        // Get image dimensions
+        int width, height;
+        double time_stamp;
+        camera_[itmImages][itmPointMap].getBinaryDataInfo(&width, &height, nullptr,
+                                                          nullptr, nullptr, &time_stamp);
+        //std::cout << "ts1: " << time_stamp << std::endl;
+        //Get 3D image raw data
+
+        int nx_return_code;
+        camera_[itmImages][itmPointMap].getBinaryData(&nx_return_code, raw_points_, &time_stamp);
+        //std::cout << "ts2: " << time_stamp << std::endl;
+
+        //Move raw data to rgbd image
+        _rgb_image.depth = cv::Mat( (unsigned int)height, (unsigned int)width, CV_32FC1, 0.0);
+
+        _rgb_image.P.setOpticalTranslation(0, 0);
+        _rgb_image.P.setOpticalCenter(0.5 *  (unsigned int)width, 0.5 * (unsigned int)height);
+
+
+
+        double fx = 0;
+        double fy = 0;
+
+        float px, py, pz;
+
+        for(int x = 0; x < width; ++x) {
+            for (int y = 0; y < height; ++y) {
+                px = raw_points_[(x * width + y) * 3];
+                if (!std::isnan(px)) {
+                    px /= 1000;
+                    py = raw_points_[(x * width + y) * 3 + 1] / 1000;
+                    pz = raw_points_[(x * width + y) * 3 + 2] / 1000;
+                    if (pz > 0)
+                    {
+                        fx = ((double)x - _rgb_image.P.getOpticalCenterX()) / (px / pz);
+                        fy = ((double)y - _rgb_image.P.getOpticalCenterY()) / (py / pz);
+                        break;
+                    }
+                }
+
+            }
+            if (fx != 0 && fy != 0)
+                break;
+        }
+
+        // Set focal lengths
+        fx = std::abs(fx);
+        fy = std::abs(fy);
+
+        _rgb_image.P.setFocalLengths(fx, fy);
+
+        for(unsigned int i = 0; i < width * height; ++i) {
+            px = raw_points_[i * 3];
+            if (!std::isnan(px)) {
+                px /= 1000.;
+                py = raw_points_[i * 3 + 1] / 1000;
+                pz = raw_points_[i * 3 + 2] / 1000;
+                sr::Vec2i pix = _rgb_image.P.project3Dto2D(sr::Vec3(px, -py, -pz));
+//        std::cout << pix << std::endl;
+                if (pix.x >= 0 && pix.y >= 0 && pix.x < _rgb_image.depth.cols && pix.y < _rgb_image.depth.rows) {
+                    _rgb_image.depth.at<float>(pix.y, pix.x) = pz;
+                }
+            }
+        }
+
+        //debug message
+//     std::cout << "Cloud capture: " << std::endl <<
+//                  "\treturn code: " << nx_return_code << std::endl <<
+//                  "\tnum points: " << raw_points_.size()/3 << std::endl <<
+//                  "\twidth: " << width << std::endl <<
+//                  "\theight: " << height << std::endl <<
+//                  "\tvalid_points: " << kk << std::endl;
+
+        //return success
+        return 1;
+    }
+
 int Device::capture(pcl::PointCloud<pcl::PointXYZ> & _p_cloud)
 {
     int ww, hh;
     float px;
+
     //std::vector<float> raw_points;
     int nx_return_code;
 

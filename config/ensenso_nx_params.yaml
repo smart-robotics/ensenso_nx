@@ -5,16 +5,19 @@
 serial_number: "171416"
 
 #run mode: run mode: 0->SERVER, 1->PUBLISHER
-run_mode: 0
+run_mode: 1
 
 #loop rate in hz (good values: 10 when SERVER, below 1 when PUBLISHER)
-rate: 20
+rate: 1
 
 #frame name to which point cloud is referenced (relative, without namespace)
-frame_name: "camara_lens_left"
+frame_name: "ensenso_nx_1/camera_lens_left"
 
 #capture autoexposure [t/f]
 auto_exposure: True
+
+#use rgbd
+rgbd: True
 
 #capture exposure time [ms]
 exposure_time: 0

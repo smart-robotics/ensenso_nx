@@ -4,10 +4,15 @@
 //Ensenso Nx Lib
 #include "nxLib.h"
 
+
 //PCL
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
+//RGBD
+#include <opencv2/core/core.hpp>
+
+#include <sr/rgbd/image.h>
 //std
 #include <iostream>
 #include <cmath>
@@ -87,6 +92,8 @@ class Device
          * \return 1 if ok, -1 if not. TODO
         **/
         int capture(pcl::PointCloud<pcl::PointXYZ> & _p_cloud);
+
+        int capture(sr::rgbd::Image & _rgb_image);
 
     protected:
         /** \brief Hardware set configuration

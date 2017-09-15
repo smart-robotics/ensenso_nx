@@ -38,6 +38,7 @@ endif()
 find_package(
     catkin REQUIRED
     COMPONENTS
+        rgbd
         roscpp
         rospy
         dynamic_reconfigure
@@ -54,6 +55,7 @@ INCLUDE_DIRECTORIES(${PCL_INCLUDE_DIRS})
 LINK_DIRECTORIES(${PCL_LIBRARY_DIRS})
 ADD_DEFINITIONS(${PCL_DEFINITIONS})
 
+find_package(OpenCV REQUIRED)
 
 # Add module path where FindEnsenso.cmake is, and then Set Ensenso library and include paths
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "$ENV{ENSENSO_INSTALL}/cmake/")
@@ -63,7 +65,7 @@ message(STATUS "Ensenso Headers found at ${ENSENSO_INCLUDE_DIRS}.")
 message(STATUS "Ensenso Libraries found at ${ENSENSO_LIBRARIES}.")
 
 # add other necessary include directories
-include_directories(src/ ${catkin_INCLUDE_DIRS})
+include_directories(src/ ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
 # Set source files
 SET(SRCS_LIB
@@ -93,12 +95,12 @@ catkin_package(
 #Build library (TODO: Should call a CMakeLists.txt at src/lib/)
 ADD_LIBRARY(${PROJECT_NAME}_LIB SHARED ${SRCS_LIB})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}_LIB
-                      ${ENSENSO_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${catkin_LIBRARIES})
+                      ${ENSENSO_LIBRARIES} ${OpenCV_LIBS} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${catkin_LIBRARIES})
 
 #Build executable
 ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS_NODE} ${SRCS_LIB})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
-                      ${ENSENSO_LIBRARIES} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${catkin_LIBRARIES})
+                      ${ENSENSO_LIBRARIES} ${OpenCV_LIBS} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 
 #Build examples
