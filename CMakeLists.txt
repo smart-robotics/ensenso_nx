@@ -38,6 +38,7 @@ endif()
 find_package(
     catkin REQUIRED
     COMPONENTS
+	sr_foundation
         rgbd
         roscpp
         rospy
