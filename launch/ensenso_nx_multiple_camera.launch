@@ -18,14 +18,18 @@
 
     <!-- specific ensenso_nx node parameters for camera 1-->
     <param name="serial_number" value="171417" type="str"/>
-    <param name="frame_name" value="$(arg cam_pick_ns)_depth_optical_link" type="str" />
+    <param name="frame_name" value="$(arg cam_pick_ns)_depth_optical_frame" type="str" />
 
     <!-- ensenso_nx node for camera 1-->
     <node
       pkg="ensenso_nx"
       type="ensenso_nx"
       name="ensenso_nx"
-      output="screen" />
+      output="screen"
+      respawn="true" >
+      <remap from="/$(arg cam_pick_ns)/ensenso_cloud" to="/$(arg cam_pick_ns)/depth/points" />
+
+    </node>
   </group>
 
   <!-- CAMERA PLACE -->
@@ -40,14 +44,17 @@
 
     <!-- specific ensenso_nx node parameters for camera 2-->
     <param name="serial_number" value="171416" type="str"/>
-    <param name="frame_name" value="$(arg cam_place_ns)_depth_optical_link" type="str" />
+    <param name="frame_name" value="$(arg cam_place_ns)_depth_optical_frame" type="str" />
 
     <!-- ensenso_nx node for camera 2-->
     <node
       pkg="ensenso_nx"
       type="ensenso_nx"
       name="ensenso_nx"
-      output="screen" />
+      output="screen"
+      respawn="true" >
+      <remap from="/$(arg cam_place_ns)/ensenso_cloud" to="/$(arg cam_place_ns)/depth/points" />
+    </node>
   </group>
 
 </launch>

@@ -8,10 +8,10 @@ serial_number: "171417"
 run_mode: 1
 
 #loop rate in hz (good values: 20 when SERVER, 1 when PUBLISHER)
-rate: 1
+rate: 0.5
 
 #frame name to which point cloud is referenced (relative, without namespace)
-frame_name: "ensenso_nx_1/camera_lens_left"
+frame_name: "cam_pick_depth_optical_frame"
 
 #capture autoexposure [t/f]
 auto_exposure: True
