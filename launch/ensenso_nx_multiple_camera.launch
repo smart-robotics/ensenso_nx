@@ -5,35 +5,11 @@
 <launch>
 
   <!-- User Args  -->
-  <arg name="rviz" default="true" doc="rviz visualization or not"/>
   <arg name="config_file" default="$(find ensenso_nx)/config/ensenso_nx_params.yaml" doc="YAML file with default configuration parameters"/>
-  <arg name="namespace_1" default="ensenso_nx_1" doc="Namespace for topics, frames and params for camera 1"/>
-  <arg name="namespace_2" default="ensenso_nx_2" doc="Namespace for topics, frames and params for camera 2"/>
+  <arg name="cam_pick_ns" default="cam_pick" doc="Namespace for topics, frames and params for camera 1"/>
+  <arg name="cam_place_ns" default="cam_place" doc="Namespace for topics, frames and params for camera 2"/>
 
-  <!-- Load robot description -->
-  <param
-  name="robot_description"
-  command="$(find xacro)/xacro --inorder $(find ensenso_nx)/urdf/multiple_ensenso_n35.urdf"/>
-
-  <!-- Run joint state publisher (Gets robot_description from parameter server)-->
-  <node
-    pkg="joint_state_publisher"
-    type="joint_state_publisher"
-    name="joint_state_publisher" >
-    <param name="publish_frequency" value="2" />
-  </node>
-
-  <!-- Run state publisher (Gets robot_description from parameter server)-->
-  <node
-    pkg="robot_state_publisher"
-    type="robot_state_publisher"
-    name="robot_state_publisher" >
-    <param name="publish_frequency" value="2"/>
-  </node>
-
-  <!-- CAMERA 1 -->
-  <!--Set the namespace for camera 1-->
-  <group ns="$(arg namespace_1)">
+  <group ns="$(arg cam_pick_ns)">
 
     <!-- default ensenso_nx node parameters-->
     <rosparam
@@ -41,24 +17,21 @@
       file="$(arg config_file)"/>
 
     <!-- specific ensenso_nx node parameters for camera 1-->
-    <param name="serial_number" value="171241" type="str"/>
-    <param name="run_mode" value="1" type="int" />
-    <param name="frame_name" value="$(arg namespace_1)_body" type="str" />
+    <param name="serial_number" value="171417" type="str"/>
+    <param name="frame_name" value="$(arg cam_pick_ns)_depth_optical_link" type="str" />
 
     <!-- ensenso_nx node for camera 1-->
     <node
       pkg="ensenso_nx"
       type="ensenso_nx"
       name="ensenso_nx"
-      output="screen">
-    </node>
-
+      output="screen" />
   </group>
 
-  <!-- CAMERA 2 -->
+  <!-- CAMERA PLACE -->
 
   <!--Set the namespace for camera 2-->
-  <group ns="$(arg namespace_2)">
+  <group ns="$(arg cam_place_ns)">
 
     <!-- default ensenso_nx node parameters-->
     <rosparam
@@ -66,28 +39,15 @@
       file="$(arg config_file)"/>
 
     <!-- specific ensenso_nx node parameters for camera 2-->
-    <param name="serial_number" value="160676" type="str"/>
-    <param name="run_mode" value="1" type="int" />
-    <param name="frame_name" value="$(arg namespace_2)_body" type="str" />
+    <param name="serial_number" value="171416" type="str"/>
+    <param name="frame_name" value="$(arg cam_place_ns)_depth_optical_link" type="str" />
 
     <!-- ensenso_nx node for camera 2-->
     <node
       pkg="ensenso_nx"
       type="ensenso_nx"
       name="ensenso_nx"
-      output="screen">
-    </node>
-
-  </group>
-
-  <!-- VISUALIZATION -->
-  <group if="$(arg rviz)">
-    <node
-      name="rviz"
-      pkg="rviz"
-      type="rviz"
-      args="-d $(find ensenso_nx)/rviz/ensenso_nx_multiple_camera.rviz">
-    </node>
+      output="screen" />
   </group>
 
 </launch>
