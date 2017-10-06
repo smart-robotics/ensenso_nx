@@ -87,6 +87,8 @@ class EnsensoNxNode
         bool publishRGBD();
         bool publishCloud();
 
+        void preCapture();
+
 
 protected:
         //Service callback implementing the point cloud capture

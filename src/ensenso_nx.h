@@ -16,43 +16,44 @@
 //std
 #include <iostream>
 #include <cmath>
+#include <sensor_msgs/CameraInfo.h>
 
 namespace EnsensoNx
 {
 
 //device configuration struct
-struct DeviceParams
-{
+    struct DeviceParams
+    {
 //     std::string ip_address_;
 //     std::string model_name_;
-    std::string serial_num_;
+        std::string serial_num_;
 
-    void print() const
-    {
+        void print() const
+        {
 //         std::cout << "\tIP address: \t" << ip_address_ << std::endl;
 //         std::cout << "\tModel: \t" << model_name_ << std::endl;
-        std::cout << "\tSN: \t" << serial_num_ << std::endl;
-    }
-};
+            std::cout << "\tSN: \t" << serial_num_ << std::endl;
+        }
+    };
 
 //capture configuration struct
-struct CaptureParams
-{
-    bool auto_exposure_;
-    unsigned int exposure_time_; //in milliseconds TODO: check if uint is enough, or needs double
-    bool dense_cloud_; //Device::capture() returns a dense (ordered) point cloud if set to true
-
-    void print() const
+    struct CaptureParams
     {
-        std::cout << "\tauto exposure [t/f]: \t" << auto_exposure_ << std::endl;
-        std::cout << "\texposure [ms]: \t" << exposure_time_ << std::endl;
-        std::cout << "\tdense cloud [t/f]: \t" << dense_cloud_ << std::endl;
-    }
-};
+        bool auto_exposure_;
+        unsigned int exposure_time_; //in milliseconds TODO: check if uint is enough, or needs double
+        bool dense_cloud_; //Device::capture() returns a dense (ordered) point cloud if set to true
+
+        void print() const
+        {
+            std::cout << "\tauto exposure [t/f]: \t" << auto_exposure_ << std::endl;
+            std::cout << "\texposure [ms]: \t" << exposure_time_ << std::endl;
+            std::cout << "\tdense cloud [t/f]: \t" << dense_cloud_ << std::endl;
+        }
+    };
 
 
-class Device
-{
+    class Device
+    {
     protected:
 
         DeviceParams device_params_; //params related to device operations
@@ -62,6 +63,10 @@ class Device
         NxLibItem camera_; //Reference to the nxlib camera device
 
         std::vector<float> raw_points_; //raw xyz points from camera
+        double cx, cy, fx, fy;
+
+
+
 
     public:
         /** \brief Constructor with serial number
@@ -94,15 +99,16 @@ class Device
         int capture(pcl::PointCloud<pcl::PointXYZ> & _p_cloud);
 
         int capture(sr::rgbd::Image & _rgb_image);
+        void preCapture();
 
-    protected:
+            protected:
         /** \brief Hardware set configuration
          * Hardware set configuration
          * \param _params: capture parameters
         **/
         void configureCapture();
 
-}; //end class
+    }; //end class
 
 } // end namespace
 

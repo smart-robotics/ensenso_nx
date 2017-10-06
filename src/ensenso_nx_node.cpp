@@ -71,6 +71,10 @@ double EnsensoNxNode::rate() const
     return rate_;
 }
 
+void EnsensoNxNode::preCapture() {
+    camera_ ->preCapture();
+}
+
 bool EnsensoNxNode::publish()
 {
     if (this->rgbd)
@@ -88,7 +92,7 @@ bool EnsensoNxNode::publishRGBD()
         ros::Time ts = ros::Time::now();
 
         //publish the cloud
-        image_.timestamp = (pcl::uint64_t)(ts.toSec()*1e9); //TODO: should be set by the EnsensoNx::Device class
+        //image_.timestamp = (pcl::uint64_t)(ts.toSec()*1e9); //TODO: should be set by the EnsensoNx::Device class
         image_.frame_id = frame_name_;
         sr::rgbd::toData(image_, rgbd_msg.data);
 
@@ -110,7 +114,7 @@ bool EnsensoNxNode::publishCloud()
         ros::Time ts = ros::Time::now();
 
         //publish the cloud
-        cloud_.header.stamp = (pcl::uint64_t)(ts.toSec()*1e6); //TODO: should be set by the EnsensoNx::Device class
+        //cloud_.header.stamp = (pcl::uint64_t)(ts.toSec()*1e6); //TODO: should be set by the EnsensoNx::Device class
         cloud_.header.frame_id = frame_name_;
         cloud_publisher_.publish(cloud_);
         return true;

@@ -17,6 +17,7 @@ int main(int argc, char **argv)
       //node loop 
       while ( ros::ok() )
       {
+            ensenso.preCapture();
             //execute pending callbacks
             ros::spinOnce(); 
             

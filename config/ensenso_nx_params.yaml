@@ -5,10 +5,10 @@
 serial_number: "171417"
 
 #run mode: run mode: 0->SERVER, 1->PUBLISHER
-run_mode: 1
+run_mode: 0
 
-#loop rate in hz (good values: 20 when SERVER, 1 when PUBLISHER)
-rate: 0.5
+#loop rate in hz (good values: 10 when SERVER, 1 when PUBLISHER)
+rate: 10
 
 #frame name to which point cloud is referenced (relative, without namespace)
 frame_name: "cam_pick_depth_optical_frame"
@@ -17,7 +17,7 @@ frame_name: "cam_pick_depth_optical_frame"
 auto_exposure: True
 
 #use rgbd
-rgbd: False
+rgbd: True
 
 #capture exposure time [ms]
 exposure_time: 0
