@@ -81,7 +81,7 @@ class EnsensoNxNode
 
         //returns rate_ value
         double rate() const;
-
+        bool do_publish;
         //Call to device snapshot acquisition and publish the point cloud
         bool publish();
         bool publishRGBD();

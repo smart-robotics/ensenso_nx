@@ -18,7 +18,7 @@ EnsensoNxNode::EnsensoNxNode():
     //Allocate the ensenso device with the provided serial number
 	ros::param::get("serial_number", param_str);
     camera_ = new EnsensoNx::Device(param_str);
-
+    do_publish = false;
     //configure node according yaml params
     ros::param::get("run_mode", param_int); this->run_mode_ = (RunMode)param_int;
     ros::param::get("rate", this->rate_);
@@ -128,18 +128,19 @@ bool EnsensoNxNode::publishServiceCallback(std_srvs::Trigger::Request &_request,
                                            std_srvs::Trigger::Response &_reply)
 {
 
-    capture_params_.auto_exposure_ = true;
-    capture_params_.dense_cloud_ = true;
-    camera_->configureCapture(capture_params_);
-
-    if (this->publish()){
-        _reply.message = "Successfully published.";
-        _reply.success = true;
-    }
-    else {
-        _reply.message = "Failed to publish.";
-        _reply.success = false;
-    }
+//    capture_params_.auto_exposure_ = true;
+//    capture_params_.dense_cloud_ = true;
+//    camera_->configureCapture(capture_params_);
+//    
+    do_publish = true;
+//    if (this->publish()){
+//        _reply.message = "Successfully published.";
+//        _reply.success = true;
+//    }
+//    else {
+//        _reply.message = "Failed to publish.";
+//        _reply.success = false;
+//    }
 
     //return
     return true;
