@@ -103,8 +103,14 @@ namespace EnsensoNx
 // }
     void Device::preCapture() {
         // Capture images
-        NxLibCommand (cmdCapture).execute();
+        try {
 
+            NxLibCommand (cmdCapture).execute();
+        }
+        catch (NxLibException &ex)
+        {
+            ensensoExceptionHandling (ex, "PreCapture");
+        }
     }
 
     int Device::capture(sr::rgbd::Image & _rgb_image)
