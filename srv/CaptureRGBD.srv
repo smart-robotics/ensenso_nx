@@ -1,0 +1,10 @@
+#Request/Reply for RGBDImage
+
+# Request:
+#   exposure in milliseconds (0 indicates autoexposure) 
+uint32 exposure
+---
+
+# Reply with the size of the captured rgbd_image
+rgbd/RGBDImage rgbd_image
+bool success

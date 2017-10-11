@@ -17,13 +17,9 @@ int main(int argc, char **argv)
       //node loop 
       while ( ros::ok() )
       {
-            ensenso.preCapture();
             //execute pending callbacks
             ros::spinOnce(); 
-            if (ensenso.do_publish) {
-                ensenso.publish();
-                ensenso.do_publish = false;
-            }
+
             //switch according run mode
             switch(ensenso.runMode())
             {

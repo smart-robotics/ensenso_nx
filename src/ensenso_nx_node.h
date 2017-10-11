@@ -19,6 +19,7 @@
 
 //this package dependencies
 #include <ensenso_nx/ensenso_nx_paramsConfig.h> //ROS dynamic configure
+#include <ensenso_nx/CaptureRGBD.h>
 
 //enum run mode
 enum RunMode {SERVER=0,PUBLISHER};
@@ -92,8 +93,8 @@ class EnsensoNxNode
 
 protected:
         //Service callback implementing the point cloud capture
-        bool publishServiceCallback(std_srvs::Trigger::Request &_request,
-                                    std_srvs::Trigger::Response &_reply);
+        bool publishServiceCallback(ensenso_nx::CaptureRGBD::Request &_request,
+                                    ensenso_nx::CaptureRGBD::Response &_reply);
 
 };
 #endif

@@ -2,7 +2,7 @@
 #include "ros/ros.h"
 
 void ensensoExceptionHandling (const NxLibException &ex,
-                               std::string func_nam)
+                               const std::string func_nam)
 {
     ROS_ERROR ("%s: NxLib error %s (%d) occurred while accessing item %s.\n", func_nam.c_str (), ex.getErrorText ().c_str (), ex.getErrorCode (),
                ex.getItemPath ().c_str ());
@@ -86,21 +86,6 @@ namespace EnsensoNx
         this->configureCapture();
     }
 
-// void Device::configureExposure(unsigned int _exposure)
-// {
-//     if (_exposure == 0) //autoexposure case
-//     {
-//         capture_params_.auto_exposure_ = true;
-//     }
-//     else //manual exposure case
-//     {
-//         capture_params_.auto_exposure_ = false;
-//         capture_params_.exposure_time_ = _exposure;
-//     }
-//
-//     //call protected member to set the configuration to the camera
-//     this->configureCapture();
-// }
     void Device::preCapture() {
         // Capture images
         try {
@@ -117,7 +102,7 @@ namespace EnsensoNx
     {
         try {
             // Capture images
-            //NxLibCommand (cmdCapture).execute();
+            NxLibCommand (cmdCapture).execute();
 
             // Compute Disparity Map
             NxLibCommand (cmdComputeDisparityMap).execute();
@@ -129,7 +114,7 @@ namespace EnsensoNx
             int width, height;
             double time_stamp;
             camera_[itmImages][itmPointMap].getBinaryDataInfo(&width, &height, nullptr,
-                                                              nullptr, nullptr, &time_stamp);
+                                                              nullptr, nullptr, nullptr);
             //std::cout << "ts1: " << std::fixed << time_stamp << std::endl;
             //Get 3D image raw data
             int nx_return_code;
@@ -177,13 +162,13 @@ namespace EnsensoNx
             int nx_return_code;
 
             // Capture images
-            //NxLibCommand(cmdCapture).execute();
+            NxLibCommand (cmdCapture).execute();
 
             // Compute Disparity Map
-            NxLibCommand(cmdComputeDisparityMap).execute();
+            NxLibCommand (cmdComputeDisparityMap).execute();
 
             // Compute Point Cloud
-            NxLibCommand(cmdComputePointMap).execute();
+            NxLibCommand (cmdComputePointMap).execute();
             double time_stamp;
             // Get image dimensions
             camera_[itmImages][itmPointMap].getBinaryDataInfo(&ww, &hh, 0, 0, 0, &time_stamp);
@@ -227,14 +212,6 @@ namespace EnsensoNx
                     kk);//checks if kk=ww*hh to set the cloud as ordered (width,height) or unordered (width=size,height=1)
             _p_cloud.is_dense = capture_params_.dense_cloud_;
 
-            //debug message
-//     std::cout << "Cloud capture: " << std::endl <<
-//                  "\treturn code: " << nx_return_code << std::endl <<
-//                  "\tnum points: " << raw_points_.size()/3 << std::endl <<
-//                  "\twidth: " << ww << std::endl <<
-//                  "\theight: " << hh << std::endl <<
-//                  "\tvalid_points: " << kk << std::endl;
-
             //return success
             return 1;
         }
@@ -245,7 +222,6 @@ namespace EnsensoNx
         }
     }
 
-//PROTECTED METHODS
 
     void Device::configureCapture()
     {
@@ -253,9 +229,6 @@ namespace EnsensoNx
         camera_[itmParameters][itmCapture][itmAutoExposure] = capture_params_.auto_exposure_;
         camera_[itmParameters][itmCapture][itmExposure    ] = (double)capture_params_.exposure_time_;//TODO check if requires cast to double.
 
-        //print out
-        //std::cout << "EnsensoNx::Device: Capture params set to:" << std::endl;
-        //capture_params_.print();
     }
 
 }//close namespace

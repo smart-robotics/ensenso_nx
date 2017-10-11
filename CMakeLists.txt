@@ -39,6 +39,7 @@ find_package(
     catkin REQUIRED
     COMPONENTS
 	sr_foundation
+        message_generation
         rgbd
         roscpp
         rospy
@@ -67,6 +68,19 @@ message(STATUS "Ensenso Libraries found at ${ENSENSO_LIBRARIES}.")
 
 # add other necessary include directories
 include_directories(src/ ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
+
+## Generate services in the 'srv' folder
+add_service_files(
+        FILES
+        CaptureRGBD.srv
+)
+
+
+generate_messages(  DEPENDENCIES
+        std_msgs
+        rgbd
+        )
+
 
 # Set source files
 SET(SRCS_LIB
@@ -103,9 +117,6 @@ ADD_EXECUTABLE(${PROJECT_NAME} ${SRCS_NODE} ${SRCS_LIB})
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
                       ${ENSENSO_LIBRARIES} ${OpenCV_LIBS} ${PCL_COMMON_LIBRARIES} ${PCL_IO_LIBRARIES} ${catkin_LIBRARIES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
-
-#Build examples
-ADD_SUBDIRECTORY(src/examples)
 
 install(DIRECTORY urdf DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 install(DIRECTORY launch DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})

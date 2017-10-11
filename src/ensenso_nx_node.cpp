@@ -88,11 +88,6 @@ bool EnsensoNxNode::publishRGBD()
     //Get a single capture from camera and publish the point cloud
     if ( camera_->capture(image_) == 1 )
     {
-        //get time
-        ros::Time ts = ros::Time::now();
-
-        //publish the cloud
-        //image_.timestamp = (pcl::uint64_t)(ts.toSec()*1e9); //TODO: should be set by the EnsensoNx::Device class
         image_.frame_id = frame_name_;
         sr::rgbd::toData(image_, rgbd_msg.data);
 
@@ -124,24 +119,30 @@ bool EnsensoNxNode::publishCloud()
     return false;
 }
 
-bool EnsensoNxNode::publishServiceCallback(std_srvs::Trigger::Request &_request,
-                                           std_srvs::Trigger::Response &_reply)
+bool EnsensoNxNode::publishServiceCallback(ensenso_nx::CaptureRGBD::Request &_request,
+                                           ensenso_nx::CaptureRGBD::Response &_reply)
 {
+    if (_request.exposure == 0) {
+        capture_params_.auto_exposure_ = true;
+        capture_params_.exposure_time_ = 0;
+    }
+    else {
+        capture_params_.auto_exposure_ = false;
+        capture_params_.exposure_time_ = _request.exposure;
 
-//    capture_params_.auto_exposure_ = true;
-//    capture_params_.dense_cloud_ = true;
-//    camera_->configureCapture(capture_params_);
-//    
-    do_publish = true;
-//    if (this->publish()){
-//        _reply.message = "Successfully published.";
-//        _reply.success = true;
-//    }
-//    else {
-//        _reply.message = "Failed to publish.";
-//        _reply.success = false;
-//    }
+    }
 
-    //return
+    camera_->configureCapture(capture_params_);
+
+    if ( camera_->capture(image_) == 1 ) {
+        image_.frame_id = frame_name_;
+        sr::rgbd::toData(image_, rgbd_msg.data);
+        _reply.rgbd_image = rgbd_msg;
+        _reply.success = true;
+    }
+    else {
+        _reply.success = false;
+    }
+
     return true;
 }
